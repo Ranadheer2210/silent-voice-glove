@@ -1,0 +1,92 @@
+#include <Wire.h>
+#include <MPU6050.h>
+
+MPU6050 mpu;
+
+// Flex sensor pins
+int flexPins[5] = {A0, A1, A2, A3, A6};
+
+// Gyro previous values (for motion detection)
+float prevGX = 0, prevGY = 0, prevGZ = 0;
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  mpu.initialize();
+}
+
+void loop() {
+
+  // ================= FLEX SENSOR =================
+  int flex[5];
+  for (int i = 0; i < 5; i++) {
+    flex[i] = analogRead(flexPins[i]);
+  }
+
+  // ================= MPU6050 =================
+  int16_t ax, ay, az, gx, gy, gz;
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  float Ax = ax / 16384.0;
+  float Ay = ay / 16384.0;
+  float Az = az / 16384.0;
+
+  float Gx = gx / 131.0;
+  float Gy = gy / 131.0;
+  float Gz = gz / 131.0;
+
+  // ================= ORIENTATION =================
+
+  float roll = atan2(Ax, Az) * 180.0 / PI;
+  String wristRoll;
+
+  if      (roll > 60)   wristRoll = "palm_up";
+  else if (roll < -60)  wristRoll = "palm_down";
+  else if (roll > 12)   wristRoll = "palm_inward";
+  else if (roll < -12)  wristRoll = "palm_outward";
+  else                  wristRoll = "palm_neutral";
+
+  float pitch = atan2(Ay, Az) * 180.0 / PI;
+  String wristPitch;
+
+  if      (pitch > 100 || pitch < -50) wristPitch = "fingers_down";
+  else if (pitch > 50)                 wristPitch = "fingers_forward";
+  else                                 wristPitch = "fingers_up";
+
+  // ================= MOTION =================
+
+  float dGx = abs(Gx - prevGX);
+  float dGy = abs(Gy - prevGY);
+  float dGz = abs(Gz - prevGZ);
+
+  String motion = "static";
+
+  if (dGx > 250 && dGy > 250) {
+    motion = "shaking";
+  }
+  else if (abs(Gx) > 30 && abs(Gy) > 30) {
+    motion = "waving";
+  }
+  else {
+    motion = "static";
+  }
+
+  prevGX = Gx;
+  prevGY = Gy;
+  prevGZ = Gz;
+
+  // ================= FINAL OUTPUT =================
+  // FORMAT → flex1,flex2,flex3,flex4,flex5,roll,pitch,motion
+
+  Serial.print(flex[0]); Serial.print(",");
+  Serial.print(flex[1]); Serial.print(",");
+  Serial.print(flex[2]); Serial.print(",");
+  Serial.print(flex[3]); Serial.print(",");
+  Serial.print(flex[4]); Serial.print(",");
+
+  Serial.print(wristRoll); Serial.print(",");
+  Serial.print(wristPitch); Serial.print(",");
+  Serial.println(motion);
+
+  delay(500); // faster + smoother than your old delays
+}

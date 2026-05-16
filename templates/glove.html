@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignSpeak — Smart Glove</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0d0d0d; --muted: #888;
+      --surface: #f7f5f0; --card: #ffffff; --border: rgba(0,0,0,0.08);
+      --pop: #e8ff47; --pop2: #47d9ff;
+      --green: #d4f8d4; --red: #fde8e8;
+      --green-ink: #1a7a3a; --red-ink: #c0392b;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface); color: var(--ink); min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(71,217,255,0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 90%, rgba(232,255,71,0.12) 0%, transparent 60%);
+      pointer-events: none; z-index: 0;
+    }
+    .page {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh; padding: 40px 20px 60px;
+    }
+    header {
+      width: 100%; max-width: 900px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 60px; animation: fadeDown 0.5s ease both;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+    .logo span { background: var(--ink); color: var(--pop); padding: 2px 8px; border-radius: 6px; margin-left: 4px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px; background: var(--card);
+      border: 1px solid var(--border); border-radius: 100px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      color: var(--ink); cursor: pointer; text-decoration: none;
+      transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .back-btn:hover { background: var(--ink); color: #fff; transform: translateY(-1px); }
+    .back-btn svg { width: 16px; height: 16px; }
+
+    .section-label {
+      font-size: 12px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    h1 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(28px, 4vw, 44px); letter-spacing: -1.5px;
+      margin-bottom: 40px; animation: fadeUp 0.5s 0.15s ease both;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 28px; padding: 48px 40px; width: 100%; max-width: 560px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.07); animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    /* ── Status banner ── */
+    .status-banner {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; border-radius: 14px;
+      font-size: 14px; font-weight: 500; margin-bottom: 28px;
+      border: 1.5px solid transparent;
+    }
+    .status-banner.ready   { background: #f0f9ff; border-color: var(--pop2); color: #0e6fa8; }
+    .status-banner.success { background: var(--green); border-color: #80e8a0; color: var(--green-ink); }
+    .status-banner.error   { background: var(--red);   border-color: #f5b0a8; color: var(--red-ink); }
+    .status-banner.info    { background: #fffbe6; border-color: #f5d870; color: #7a5c00; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ready   .status-dot { background: var(--pop2); }
+    .success .status-dot { background: #4caf50; animation: pulse 1.5s infinite; }
+    .error   .status-dot { background: var(--red-ink); }
+    .info    .status-dot { background: #e6b800; }
+
+    /* ── Action buttons ── */
+    .btn-row { display: flex; gap: 14px; margin-bottom: 32px; }
+    .action-btn {
+      flex: 1; padding: 16px 12px;
+      border: none; border-radius: 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 8px; transition: all 0.2s;
+    }
+    .action-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .btn-calibrate {
+      background: var(--pop2); color: var(--ink);
+    }
+    .btn-calibrate:hover { filter: brightness(0.92); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(71,217,255,0.35); }
+
+    .btn-detect {
+      background: var(--ink); color: #fff;
+    }
+    .btn-detect:hover:not(:disabled) { background: #333; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .btn-detect:disabled {
+      background: #ccc; color: #999; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+
+    /* ── Timer display ── */
+    .timer-wrap {
+      text-align: center; padding: 20px;
+      background: var(--surface); border-radius: 14px;
+      margin-bottom: 28px; display: none;
+    }
+    .timer-wrap.visible { display: block; }
+    .timer-num {
+      font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800;
+      letter-spacing: -2px; color: var(--ink); line-height: 1;
+    }
+    .timer-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .progress-bar-wrap {
+      background: var(--border); border-radius: 100px;
+      height: 4px; margin-top: 14px; overflow: hidden;
+    }
+    .progress-bar { height: 100%; border-radius: 100px; transition: width 1s linear; }
+    .prog-blue  { background: var(--pop2); }
+    .prog-dark  { background: var(--ink); }
+
+    /* ── Finger result grid ── */
+    .finger-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 10px; margin-bottom: 16px;
+    }
+    .finger-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 14px; padding: 14px 8px; text-align: center;
+      transition: all 0.3s;
+    }
+    .finger-card .f-name {
+      font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .finger-card .f-icon { font-size: 22px; margin-bottom: 6px; }
+    .finger-card .f-status {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--muted);
+    }
+    .finger-card.bent {
+      background: var(--red); border-color: #f5b0a8;
+    }
+    .finger-card.bent .f-status { color: var(--red-ink); }
+    .finger-card.straight {
+      background: var(--green); border-color: #80e8a0;
+    }
+    .finger-card.straight .f-status { color: var(--green-ink); }
+
+    /* ── Calibration values ── */
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 10px; margin-bottom: 8px;
+    }
+    .cal-chip {
+      background: #fffbe6; border: 1.5px solid #f5d870;
+      border-radius: 12px; padding: 10px 6px; text-align: center;
+    }
+    .cal-chip .c-label { font-size: 10px; color: #7a5c00; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+    .cal-chip .c-val { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #7a5c00; }
+
+    .section-title {
+      font-size: 12px; font-weight: 500; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* ── Gesture output box ── */
+    .gesture-box {
+      background: var(--ink); color: var(--pop);
+      border-radius: 20px; padding: 28px 24px;
+      text-align: center; margin-bottom: 20px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .gesture-box .g-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 10px;
+    }
+    .gesture-box .g-word {
+      font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800;
+      letter-spacing: -1px; line-height: 1;
+    }
+    .gesture-box .g-tuple {
+      font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── Orientation chips (3-col for roll/pitch/motion) ── */
+    .orient-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 24px;
+    }
+    .orient-chip {
+      background: #f0f9ff; border: 1.5px solid var(--pop2);
+      border-radius: 12px; padding: 12px 8px; text-align: center;
+    }
+    .orient-chip .o-label {
+      font-size: 10px; color: #0e6fa8; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+    }
+    .orient-chip .o-val {
+      font-family: 'Syne', sans-serif; font-size: 12px;
+      font-weight: 700; color: #0e6fa8; word-break: break-word;
+    }
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(20px);  } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse    { 0%, 100% { opacity:1; } 50% { opacity:0.3; } }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="logo">Sign<span>Speak</span></div>
+    <a href="/" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Back
+    </a>
+  </header>
+
+  <div class="section-label">Hardware Input</div>
+  <h1>🖐 Smart Glove</h1>
+
+  <div class="card">
+
+    <!-- Status Banner -->
+    <div class="status-banner {% if message_type %}{{ message_type }}{% else %}ready{% endif %}" id="statusBanner">
+      <div class="status-dot"></div>
+      <span id="statusText">{% if message %}{{ message }}{% else %}Ready — calibrate your glove first.{% endif %}</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="btn-row">
+      <form method="POST" action="/calibrate" onsubmit="startCalTimer()" style="flex:1;display:flex;">
+        <button type="submit" class="action-btn btn-calibrate" style="width:100%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+          </svg>
+          Calibrate
+        </button>
+      </form>
+
+      <form method="POST" action="/detect" onsubmit="startDetTimer()" style="flex:1;display:flex;">
+        <button type="submit" class="action-btn btn-detect" style="width:100%"
+          {% if not calibrated %}disabled title="Calibrate first"{% endif %}
+          id="detectBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Detect
+        </button>
+      </form>
+    </div>
+
+    <!-- Timer -->
+    <div class="timer-wrap" id="timerWrap">
+      <div class="timer-num" id="timerNum">5</div>
+      <div class="timer-label" id="timerLabel">Collecting readings…</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar prog-blue" id="progressBar" style="width:100%"></div>
+      </div>
+    </div>
+
+    <!-- Calibration baseline display -->
+    {% if param and message_type == 'success' and not result %}
+    <div style="margin-bottom: 24px;">
+      <div class="section-title">Baseline Averages (20 readings)</div>
+      <div class="cal-grid">
+        {% for value in param %}
+        <div class="cal-chip">
+          <div class="c-label">F{{ loop.index }}</div>
+          <div class="c-val">{{ value }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Gesture output box -->
+    {% if gesture %}
+    <div class="gesture-box">
+      <div class="g-label">Recognised Gesture</div>
+      <div class="g-word">{{ gesture }}</div>
+      <div class="g-tuple">{{ finger_states | join(" · ") }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Roll / Pitch / Motion display -->
+    {% if roll %}
+    <div style="margin-bottom: 24px;">
+      <div class="section-title">Orientation &amp; Motion</div>
+      <div class="orient-grid">
+        <div class="orient-chip">
+          <div class="o-label">Roll</div>
+          <div class="o-val">{{ roll | replace('_', ' ') | upper }}</div>
+        </div>
+        <div class="orient-chip">
+          <div class="o-label">Pitch</div>
+          <div class="o-val">{{ pitch | replace('_', ' ') | upper }}</div>
+        </div>
+        <div class="orient-chip">
+          <div class="o-label">Motion</div>
+          <div class="o-val">{{ motion | replace('_', ' ') | upper }}</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Detection finger grid -->
+    {% if result %}
+    <div style="margin-bottom: 8px;">
+      <div class="section-title">Detection Result</div>
+      <div class="finger-grid">
+        {% for item in result %}
+        <div class="finger-card {{ 'bent' if 'BENT' in item else 'straight' }}">
+          <div class="f-name">F{{ loop.index }}</div>
+          <div class="f-icon">{{ '🤜' if 'BENT' in item else '🖐' }}</div>
+          <div class="f-status">{{ 'Bent' if 'BENT' in item else 'Straight' }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+  var CAL_SECS  = 7;   // calibration: ~5 sec serial + buffer
+  var DET_SECS  = 10;  // detection: ~7 sec gesture + processing
+  var timerInterval = null;
+
+  function runTimer(totalSecs, label, barClass) {
+    var wrap  = document.getElementById('timerWrap');
+    var num   = document.getElementById('timerNum');
+    var lbl   = document.getElementById('timerLabel');
+    var bar   = document.getElementById('progressBar');
+
+    bar.className = 'progress-bar ' + barClass;
+    lbl.textContent = label;
+    num.textContent = totalSecs;
+    bar.style.width = '100%';
+    wrap.classList.add('visible');
+
+    var remaining = totalSecs;
+    timerInterval = setInterval(function() {
+      remaining--;
+      num.textContent = remaining > 0 ? remaining : '…';
+      bar.style.width = Math.max(0, (remaining / totalSecs) * 100) + '%';
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        lbl.textContent = 'Processing…';
+      }
+    }, 1000);
+  }
+
+  function startCalTimer() {
+    runTimer(CAL_SECS, 'Collecting calibration readings…', 'prog-blue');
+  }
+
+  function startDetTimer() {
+    var btn = document.getElementById('detectBtn');
+    if (btn) btn.disabled = true;
+    runTimer(DET_SECS, 'Perform your gesture now…', 'prog-dark');
+  }
+</script>
+</body>
+</html>

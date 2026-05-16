@@ -1,0 +1,33 @@
+﻿thumb,index,middle,ring,pinky,roll,pitch,motion,gesture
+straight,straight,straight,straight,straight,palm_outward,fingers_up,static,HELLO
+straight,straight,straight,straight,straight,palm_outward,fingers_up,waving,HELLO
+straight,straight,straight,straight,straight,palm_netural,fingers_up,waving,HELLO
+straight,straight,straight,straight,straight,palm_inward,fingers_forward,waving,THANK YOU
+straight,straight,straight,straight,straight,palm_inward,fingers_up,waving,THANK YOU
+straight,straight,straight,straight,straight,palm_inward,fingers_up,static,THANK YOU
+bent,bent,bent,bent,bent,palm_down,fingers_down,static,STOP
+bent,straight,bent,bent,bent,palm_neutral,fingers_up,static,ONE
+bent,straight,bent,bent,bent,palm_outward,fingers_up,static,ONE
+bent,straight,straight,bent,bent,palm_neutral,fingers_up,static,TWO
+bent,straight,straight,bent,bent,palm_outward,fingers_up,static,TWO
+bent,straight,straight,straight,bent,palm_neutral,fingers_up,static,THREE
+straight,straight,straight,bent,bent,palm_outward,fingers_up,static,THREE
+straight,straight,straight,bent,bent,palm_inward,fingers_up,static,THREE
+straight,straight,straight,bent,bent,palm_neutral,fingers_up,static,THREE
+bent,straight,straight,straight,straight,palm_neutral,fingers_up,static,FOUR
+bent,straight,straight,straight,straight,palm_outward,fingers_up,static,FOUR
+straight,straight,straight,straight,straight,palm_neutral,fingers_up,static,FIVE
+straight,straight,straight,straight,straight,palm_neutral,fingers_up,static,FIVE
+straight,bent,bent, bent,straight,palm_outward,fingers_forward,static,CALL ME
+straight,bent,bent, bent,straight,palm_inward,fingers_forward,static,CALL ME
+straight,bent,bent, bent,straight,palm_neutral,fingers_forward,static,CALL ME
+straight,straight,bent,bent,straight,palm_outward,fingers_up,static,I LOVE YOU
+straight,straight,bent,bent,straight,palm_neutral,fingers_up,static,I LOVE YOU
+bent,bent,bent,bent,bent,palm_outward,fingers_forward,waving,YES
+bent,bent,bent,bent,bent,palm_outward,fingers_up,waving,YES
+bent,bent,bent,bent,bent,palm_down,fingers_up,waving,YES
+bent,bent,bent,bent,bent,palm_down,fingers_forward,waving,YES
+bent,straight,bent,bent,bent,palm_outward,fingers_up,static,LOOK
+bent,bent,bent,bent,bent,palm_outward,fingers_up,waving,EMERGENCY
+straight,bent,bent,bent,straight,palm_outward,fingers_forward,shaking,CALL 
+

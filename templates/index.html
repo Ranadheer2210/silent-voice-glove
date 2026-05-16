@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignSpeak — Intelligent Communication System</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --ink: #0d0d0d;
+        --ink2: #3a3a3a;
+        --muted: #888;
+        --surface: #f7f5f0;
+        --card: #ffffff;
+        --accent: #1a1a1a;
+        --pop: #e8ff47;
+        --pop2: #47d9ff;
+        --border: rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--surface);
+        color: var(--ink);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated noise bg */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(
+            ellipse 80% 60% at 20% 10%,
+            rgba(232, 255, 71, 0.18) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 80% at 80% 90%,
+            rgba(71, 217, 255, 0.15) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .page {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 40px 20px 60px;
+      }
+
+      /* Header */
+      header {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 80px;
+        animation: fadeDown 0.6s ease both;
+      }
+
+      .logo {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.5px;
+        color: var(--ink);
+      }
+
+      .logo span {
+        display: inline-block;
+        background: var(--ink);
+        color: var(--pop);
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin-left: 4px;
+      }
+
+      .glove-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      .glove-btn:hover {
+        background: var(--ink);
+        color: var(--pop);
+        border-color: var(--ink);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .glove-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      /* Hero */
+      .hero {
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeUp 0.7s 0.1s ease both;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        padding: 6px 14px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 28px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4caf50;
+        animation: pulse 2s infinite;
+      }
+
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-weight: 800;
+        font-size: clamp(36px, 6vw, 72px);
+        line-height: 1.05;
+        letter-spacing: -2px;
+        color: var(--ink);
+        margin-bottom: 20px;
+      }
+
+      h1 .highlight {
+        position: relative;
+        display: inline-block;
+      }
+
+      h1 .highlight::after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: var(--pop);
+        z-index: -1;
+        border-radius: 2px;
+      }
+
+      .subtitle {
+        font-size: 18px;
+        color: var(--muted);
+        font-weight: 300;
+        max-width: 460px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      /* Main Card */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 560px;
+        box-shadow:
+          0 8px 40px rgba(0, 0, 0, 0.07),
+          0 2px 8px rgba(0, 0, 0, 0.04);
+        animation: fadeUp 0.7s 0.2s ease both;
+      }
+
+      .card-label {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      /* Transcript field */
+      .transcript-wrap {
+        position: relative;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-bottom: 24px;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .transcript-wrap:focus-within {
+        border-color: var(--ink);
+        box-shadow: 0 0 0 4px rgba(13, 13, 13, 0.06);
+      }
+
+      .transcript-wrap input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        color: var(--ink);
+        padding-right: 48px;
+      }
+
+      .transcript-wrap input::placeholder {
+        color: var(--muted);
+      }
+
+      /* Mic button */
+      .mic-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--ink);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .mic-btn:hover {
+        background: #333;
+        transform: translateY(-50%) scale(1.05);
+      }
+
+      .mic-btn.recording {
+        background: #e53935;
+        animation: micPulse 1.2s infinite;
+      }
+
+      .mic-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Hint */
+      .hint {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 28px;
+      }
+
+      .hint svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+
+      /* Submit button */
+      .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: var(--ink);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        letter-spacing: -0.2px;
+      }
+
+      .submit-btn:hover {
+        background: #222;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .submit-btn:active {
+        transform: translateY(0);
+      }
+
+      .submit-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Recording wave */
+      .wave-wrap {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 24px;
+        margin-bottom: 16px;
+      }
+
+      .wave-wrap.active {
+        display: flex;
+      }
+
+      .wave-bar {
+        width: 4px;
+        border-radius: 2px;
+        background: var(--ink);
+        animation: wave 1s ease-in-out infinite;
+      }
+
+      .wave-bar:nth-child(1) {
+        height: 8px;
+        animation-delay: 0s;
+      }
+      .wave-bar:nth-child(2) {
+        height: 20px;
+        animation-delay: 0.1s;
+      }
+      .wave-bar:nth-child(3) {
+        height: 14px;
+        animation-delay: 0.2s;
+      }
+      .wave-bar:nth-child(4) {
+        height: 22px;
+        animation-delay: 0.3s;
+      }
+      .wave-bar:nth-child(5) {
+        height: 10px;
+        animation-delay: 0.4s;
+      }
+      .wave-bar:nth-child(6) {
+        height: 18px;
+        animation-delay: 0.15s;
+      }
+      .wave-bar:nth-child(7) {
+        height: 6px;
+        animation-delay: 0.25s;
+      }
+
+      /* Features row */
+      .features {
+        display: flex;
+        gap: 12px;
+        margin-top: 48px;
+        width: 100%;
+        max-width: 560px;
+        animation: fadeUp 0.7s 0.35s ease both;
+      }
+
+      .feature {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px 16px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .feature-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .feature-icon.y {
+        background: var(--pop);
+      }
+      .feature-icon.b {
+        background: var(--pop2);
+      }
+      .feature-icon.g {
+        background: #d4f8d4;
+      }
+
+      .feature-icon svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .feature h3 {
+        font-family: "Syne", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ink);
+        margin-bottom: 4px;
+      }
+
+      .feature p {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      /* Status text */
+      #status-text {
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 14px;
+        min-height: 20px;
+        transition: color 0.2s;
+      }
+
+      #status-text.active {
+        color: #e53935;
+        font-weight: 500;
+      }
+
+      /* Keyframes */
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      @keyframes micPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(229, 57, 53, 0);
+        }
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(0.5);
+        }
+        50% {
+          transform: scaleY(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- Header -->
+      <header>
+        <div class="logo">Sign<span>Speak</span></div>
+        <a href="glove" class="glove-btn">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+            <path
+              d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34L4 19"
+            />
+          </svg>
+          Use Glove
+        </a>
+      </header>
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          AI-Powered Sign Language
+        </div>
+        <h1>Speak.<br />We'll <span class="highlight">Sign</span> it.</h1>
+        <p class="subtitle">
+          Record your voice and watch it transform into sign language in real
+          time.
+        </p>
+      </div>
+
+      <!-- Main Card -->
+      <div class="card">
+        <div class="card-label">Your Message</div>
+
+        <div class="wave-wrap" id="wave">
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+          <div class="wave-bar"></div>
+        </div>
+
+        <div class="transcript-wrap">
+          <input
+            type="text"
+            id="transcript"
+            placeholder="Tap the mic or type here…"
+            autocomplete="off"
+          />
+          <button
+            class="mic-btn"
+            id="micBtn"
+            onclick="startDictation()"
+            title="Start recording"
+            aria-label="Start recording"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="23" />
+              <line x1="8" y1="23" x2="16" y2="23" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="hint">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          Type a word or sentence, or use the mic to speak — both work!
+        </div>
+
+        <button class="submit-btn" onclick="submitText()">
+          Convert to Sign Language
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="13 17 18 12 13 7" />
+            <polyline points="6 17 11 12 6 7" />
+          </svg>
+        </button>
+
+        <div id="status-text">Ready to listen</div>
+      </div>
+
+      <!-- Feature pills -->
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon y">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0d0d0d"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          </div>
+          <h3>Voice Input</h3>
+          <p>Speak naturally, we handle the rest</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon b">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0d0d0d"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+              <line x1="8" y1="21" x2="16" y2="21" />
+              <line x1="12" y1="17" x2="12" y2="21" />
+            </svg>
+          </div>
+          <h3>Sign Videos</h3>
+          <p>Clear, accurate sign language clips</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon g">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#0d0d0d"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+              <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+              <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+              <path
+                d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34L4 19"
+              />
+            </svg>
+          </div>
+          <h3>Glove Mode</h3>
+          <p>Hardware glove integration</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function submitText() {
+        var text = document.getElementById("transcript").value;
+        var status = document.getElementById("status-text");
+
+        if (!text) {
+          status.textContent = "Please type or speak something first.";
+          status.classList.add("active");
+          setTimeout(function () {
+            status.classList.remove("active");
+            status.textContent = "Ready to listen";
+          }, 2500);
+          return;
+        }
+
+        status.textContent = "Processing…";
+
+        $.post("/trial", { ans: text }, function () {
+          window.location.href = "vids";
+        }).fail(function () {
+          window.location.href = "vids";
+        });
+      }
+
+      function startDictation() {
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+          document.getElementById("status-text").textContent =
+            "Speech recognition not supported in this browser.";
+          return;
+        }
+
+        const btn = document.getElementById("micBtn");
+        const wave = document.getElementById("wave");
+        const status = document.getElementById("status-text");
+        const input = document.getElementById("transcript");
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        // ✅ ALL HANDLERS ASSIGNED BEFORE .start()
+
+        recognition.onresult = function (e) {
+          if (!e.results || !e.results[0] || !e.results[0][0]) return;
+          const text = e.results[0][0].transcript;
+          input.value = text;
+          btn.classList.remove("recording");
+          wave.classList.remove("active");
+          status.textContent = "Got it! Click Convert to see signs.";
+          status.classList.remove("active");
+        };
+
+        recognition.onerror = function (e) {
+          recognition.stop();
+          btn.classList.remove("recording");
+          wave.classList.remove("active");
+          const msgs = {
+            "not-allowed": "Microphone blocked. Allow permission.",
+            "no-speech": "No speech detected.",
+            "audio-capture": "No microphone found.",
+            network: "Network issue.",
+          };
+          status.textContent = msgs[e.error] || "Error occurred. Try again.";
+          status.classList.remove("active");
+        };
+
+        recognition.onend = function () {
+          btn.classList.remove("recording");
+          wave.classList.remove("active");
+          status.classList.remove("active");
+          if (!input.value) {
+            status.textContent = "No speech detected. Try again.";
+          } else if (status.textContent === "Listening…") {
+            status.textContent = "Ready to listen";
+          }
+        };
+
+        // ✅ START ONLY AFTER ALL HANDLERS ARE SET
+        recognition.start();
+        btn.classList.add("recording");
+        wave.classList.add("active");
+        status.textContent = "Listening…";
+        status.classList.add("active");
+      }
+    </script>
+  </body>
+</html>
