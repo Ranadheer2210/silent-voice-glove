@@ -325,13 +325,3 @@ The project includes:
 - Human-computer interaction research
 
 ---
-
-# Authors
-
-Developed as a Final Year Engineering Project.
-
----
-
-# License
-
-This project is intended for educational and research purposes.
