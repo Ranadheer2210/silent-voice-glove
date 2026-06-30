@@ -377,11 +377,6 @@ port = os.getenv("GLOVE_PORT", "COM13")  # Change default here
 - 🤖 **Assistive Technology** - Foundation for accessibility tools
 - 🧠 **Gesture Recognition** - ML research platform
 
----
-
-## 📝 License
-
-This project is open-source and available for educational and research purposes.
 
 ---
 
@@ -415,5 +410,3 @@ This project combines:
 - Sign language reference materials
 
 ---
-
-**Made with ❤️ for accessible communication**
